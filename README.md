@@ -1,15 +1,17 @@
-# Contribution [#]: [Issue Title]
+# Contribution [1]: Duplicate ids on same page
 
-**Contribution Number:** [1 / 2 / 3]  
-**Student:** [Your Name]  
-**Issue:** [GitHub issue link]  
-**Status:** [Phase I / Phase II / Phase III / Phase IV] [In Progress / Complete]
+**Contribution Number:** 1  
+**Student:** Mehereen Meem  
+**Issue:** https://github.com/phpmyadmin/phpmyadmin/issues/19108  
+**Status:** Phase I Complete
 
 ---
 
 ## Why I Chose This Issue
 
-[1-2 paragraphs explaining why this issue interests you, how it matches your skills/learning goals, what you hope to learn]
+I chose this issue because it’s labeled as a good first issue, newbie, and UI issue, so it seemed like a good starting point for my first open source contribution. The problem is clearly explained, and the maintainers gave helpful context and suggestions for possible fixes. I also liked that the issue involves real debugging and frontend work without being too overwhelming or requiring deep backend knowledge.
+
+Overall, it felt like a good balance between learning how to work in a larger codebase, contributing something meaningful, and keeping the scope manageable for a first contribution.
 
 ---
 
@@ -17,19 +19,25 @@
 
 ### Problem Description
 
-[In your own words, what's broken or missing?]
+Some pages in phpMyAdmin currently have duplicate HTML id attributes. Since HTML IDs are supposed to be unique on a page, this becomes a problem when the same Twig templates get rendered multiple times and create repeated IDs in the DOM. This can cause issues with JavaScript selectors, accessibility tools, and general browser behavior because IDs are meant to identify a single element on the page.
 
 ### Expected Behavior
 
-[What should happen?]
+Each HTML element on a page should have a unique id value. If multiple elements need similar styling or behavior, they should use classes or data attributes instead of duplicate IDs. Running the duplicate ID detection script in the browser console should return an empty array with no duplicate IDs found.
 
 ### Current Behavior
 
-[What actually happens?]
+Right now, when running the duplicate ID detection script from the GitHub issue, duplicate IDs are returned instead of an empty array. This means that some elements on the page are sharing the same id, which breaks standard HTML behavior.
 
 ### Affected Components
 
-[Which parts of the codebase are involved?]
+The issue appears to involve:
+- Twig templates that are rendered more than once
+- Frontend HTML markup
+- JavaScript selectors that may depend on IDs
+- UI pages such as table browsing pages where duplicate IDs appear
+
+I will likely need to inspect the Twig templates and determine where duplicate IDs are introduced so they can be replaced or made unique safely.
 
 ---
 
