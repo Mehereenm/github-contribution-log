@@ -1,9 +1,9 @@
-# Contribution [2]: Duplicate ids on same page
+# Contribution [3]: Duplicate ids on same page
 
-**Contribution Number:** 2 
+**Contribution Number:** 3
 **Student:** Mehereen Meem  
 **Issue:** https://github.com/phpmyadmin/phpmyadmin/issues/19108  
-**Status:** Phase II Update
+**Status:** Phase II (completed)
 
 ---
 
@@ -134,18 +134,29 @@ I will likely need to inspect the Twig templates and determine where duplicate I
    console.log('Duplicate IDs found:', duplicates);
    console.table(duplicates);
    ```
-
-
-
-1. [Step 1]
-2. [Step 2]
-3. [Observed result]
+   
+3. Observed result
+Running the duplicate ID detection script on a page with query results or modal interactions returns a non-empty array.
+Example duplicate IDs observed:
+- createViewModal
+- createViewModalDialog
+- createViewModalLabel
+- createViewModalGoButton
+- enumEditorModal
+- previewSqlModal
+This shows that the page contains repeated id attributes instead of unique values.
 
 ### Reproduction Evidence
 
-- **Commit showing reproduction:** [Link to commit in your fork]
-- **Screenshots/logs:** [If applicable]
-- **My findings:** [What you discovered during reproduction]
+- **Commit showing reproduction:** https://github.com/Mehereenm/phpmyadmin301
+- **Screenshots/logs:** 
+- **My findings:**
+   - base.twig already includes shared modal templates globally:
+      - modals/preview_sql_modal.twig
+      - modals/enum_set_editor.twig
+      - modals/create_view.twig
+   - Several child templates also include the same modals again, causing duplicate DOM IDs.
+   - The issue is not a one-off CSS or JS bug, it is a template rendering problem caused by duplicate modal includes.
 
 ---
 
@@ -153,30 +164,51 @@ I will likely need to inspect the Twig templates and determine where duplicate I
 
 ### Analysis
 
-[Your analysis of the root cause - what's causing the issue?]
+The main problem is that phpMyAdmin renders the same modal templates more than once on certain pages. base.twig already includes shared modals such as create_view.twig, enum_set_editor.twig, and preview_sql_modal.twig, while some child templates also include those same modal templates again. That duplicate rendering produces repeated DOM id values like createViewModal, enumEditorModal, and previewSqlModal.
 
 ### Proposed Solution
 
-[High-level description of your fix approach]
+Remove the redundant modal includes from child templates and keep them only in base.twig. This prevents duplicate IDs from being generated while maintaining the same modal functionality and page behavior.
 
 ### Implementation Plan
 
 Using UMPIRE framework (adapted):
 
-**Understand:** [Restate the problem]
+**Understand:** There are duplicate HTML id attributes and the same Twig templates get rendered multiple times and create repeated IDs in the DOM.
 
-**Match:** [What similar patterns/solutions exist in the codebase?]
+**Match:** 
+The same pattern exists in multiple templates:
+- no_results_returned.twig
+- table.twig
+- column_definitions_form.twig
+- index_form.twig
+- etc
 
-**Plan:** [Step-by-step implementation plan]
-1. [Modify file X to do Y]
-2. [Add function Z]
-3. [Update tests]
+**Plan:** 
+1. Modify no_results_returned.twig to remove {{ include('modals/create_view.twig') }}.
+2. Modify table.twig to remove the duplicate create_view.twig include.
+3. Modify column_definitions_form.twig to remove {{ include('modals/enum_set_editor.twig') }}.
+4. Modify index_form.twig to remove the redundant {{include('modals/preview_sql_modal.twig') }} block.
+5. Audit any remaining include('modals/...') occurrences and remove duplicates when the same modal is already loaded in base.twig.
+6. Update documentation/tests if any regression tests or comments should note that shared modals are centralized.
 
-**Implement:** [Link to your branch/commits as you work]
+**Implement:** 
+https://github.com/Mehereenm/phpmyadmin301/tree/fix/issue-19108-duplicate-ids
 
-**Review:** [Self-review checklist - does it follow the project's contribution guidelines?]
+**Review:** 
+- Does the fix remove redundant modals/... includes only where base.twig already provides them?
+- Does it preserve the existing page rendering flow?
+- Is the change small and focused per commit?
+- Does the documentation clearly explain reproduction and root cause?
+- Are commit messages clear and aligned with project style?
 
-**Evaluate:** [How will you verify it works?]
+
+**Evaluate:** 
+I can verify the fix by:
+- Running the browser console duplicate-ID detection script on affected pages
+- Confirming the duplicate IDs disappear
+- Visiting pages that use the affected modals and ensuring the modals still open and function
+- Checking that no new Twig syntax issues were introduced
 
 ---
 
